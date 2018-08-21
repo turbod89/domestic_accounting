@@ -76,7 +76,7 @@ class SantanderTransactionsListTemplate extends BaseModel {
                 $highestRow = $worksheet->getHighestRow();
 
                 $colIndex = $headerColIndex;
-                for ($rowIndex = $highestRow; $rowIndex > $headerCell->getRow() ; $rowIndex--) {
+                for ($rowIndex = $headerCell->getRow() + 1; $rowIndex <= $highestRow ; $rowIndex++) {
                     $value = $worksheet->getCellByColumnAndRow($colIndex, $rowIndex)->getValue();
                     $data[$field['name']][] = $value;
                 }
@@ -108,12 +108,12 @@ class SantanderTransactionsListTemplate extends BaseModel {
             $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
 
             //
-
             $transaction = new Transaction();
             $transaction->fill($rowData);
             $parsedData[] = $transaction;
         }
 
+        $parsedData = array_reverse($parsedData);
         return $parsedData;
     }
 
