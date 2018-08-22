@@ -29,15 +29,28 @@ class TransactionController extends BaseController
         $files = $request->allFiles();
         foreach ($files as $file) {
 
-            if ($file->isValid()) {
-                error_log('File is valid');
+            if (!$file->isValid()) {
+                error_log('File is invalid');
+            } else if ($file->getClientMimeType() !== 'application/octet-stream') {
+                error_log('Invalid mime type: '.$file->getClientMimeType());
+            } else if (!in_array($file->getClientOriginalExtension(),['xlsx','xls'])) {
+                error_log('Invalid extension: '.$file->getClientOriginalExtension());
+            } else {
 
                 $dstPath = '/tmp/';
-                $dstName = 'a.xls';
+                $dstName = $file->getClientOriginalName();
                 $dstFd = $dstPath . $dstName;
                 $file->move($dstPath, $dstName);
 
-                $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd);
+                $data = [];
+                if (preg_match('/santander/i',$file->getClientOriginalName())) {
+                    error_log('Santander');
+                    $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd);
+                } else if (preg_match('/ing.?.?direct/i',$file->getClientOriginalName())) {
+                    error_log('ing direct');
+                } else {
+                    error_log('Not known entity');
+                }
 
                 foreach ($data as $transaction) {
 
@@ -58,8 +71,6 @@ class TransactionController extends BaseController
                     }
                 }
 
-            } else {
-                error_log('File is invalid');
             }
 
         }
