@@ -59,6 +59,10 @@ class SantanderTransactionsListTemplate extends BaseModel {
         ],
     ];
 
+    private static function string2floatSpanish($value) {
+        return (float) str_replace(',','.',str_replace('.','',$value));
+    }
+
     public static function getTransactionsListFromFile($fd) {
 
         $spreadsheet = SpreadsheetHelper::openFile($fd);
@@ -102,12 +106,18 @@ class SantanderTransactionsListTemplate extends BaseModel {
                 $rowData[$field['name']] = $data[$field['name']][$rowIndex];
             }
 
-            // parse dates
+            // parse strings
+            $rowData['concept'] = trim($rowData['concept']);
 
+            // parse dates
             $rowData['transactionDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['transactionDate'].' 00');
             $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
 
-            //
+            // parse numbers
+            $rowData['import'] = self::string2floatSpanish($rowData['import']);
+            $rowData['balance'] = self::string2floatSpanish($rowData['balance']);
+
+
             $transaction = new Transaction();
             $transaction->fill($rowData);
             $parsedData[] = $transaction;
