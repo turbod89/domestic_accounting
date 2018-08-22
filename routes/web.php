@@ -11,9 +11,10 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
+$router->get('/', [
+    'as' => 'getAll',
+    'uses' => 'TransactionController@getAll'
+]);
 
 $router->post('/', [
     'as' => 'import',

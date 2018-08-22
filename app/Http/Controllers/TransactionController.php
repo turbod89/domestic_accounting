@@ -77,4 +77,9 @@ class TransactionController extends BaseController
 
         }
     }
+
+    public function getAll(Request $request) {
+        $transactions = Transaction::get();
+        return response()->json($transactions);
+    }
 }

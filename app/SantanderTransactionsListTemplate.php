@@ -30,10 +30,6 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
         ],
     ];
 
-    private static function string2floatSpanish($value) {
-        return (float) str_replace(',','.',str_replace('.','',$value));
-    }
-
     private static function getAccountFromSpreadsheet($spreadsheet) {
         $found = SpreadsheetHelper::searchFirstInCells('Número de Cuenta:', $spreadsheet);
 
