@@ -18,7 +18,8 @@ class Transaction extends BaseModel {
         'transactionDate',
         'valueDate',
         'concept',
-        'import',
+        'account',
+        'value',
         'balance',
     ];
 

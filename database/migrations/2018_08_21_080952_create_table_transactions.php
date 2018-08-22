@@ -23,7 +23,8 @@ class CreateTableTransactions extends Migration
             $table->dateTime('transaction_date')->nullable(false);
             $table->dateTime('value_date')->nullable(false);
             $table->string('concept',256)->nullable();
-            $table->decimal('import',10,2)->nullable(false);
+            $table->string('account',128)->nullable();
+            $table->decimal('value',10,2)->nullable(false);
             $table->decimal('balance', 10,2)->nullable(false);
 
             $table->dateTime('create_at')->default(DB::raw('NOW()'));

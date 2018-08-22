@@ -38,20 +38,23 @@ class TransactionController extends BaseController
                 $file->move($dstPath, $dstName);
 
                 $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd);
+
                 foreach ($data as $transaction) {
+
                     $actualTransaction = Transaction::where([
                         ['transaction_date',$transaction->transactionDate],
                         ['value_date',$transaction->valueDate],
                         ['concept',$transaction->concept],
-                        ['import',$transaction->import],
+                        ['account',$transaction->account],
+                        ['value',$transaction->value],
                         ['balance',$transaction->balance],
                     ])->first();
 
                     if (is_null($actualTransaction)) {
-                        error_log('Transaction with date '.$transaction->transactionDate->format('d/m/Y').' does not exist yet.');
+                        // error_log('Transaction with date '.$transaction->transactionDate->format('d/m/Y').' does not exist yet.');
                         $transaction->save();
                     } else {
-                        error_log('Transaction with date '.$transaction->transactionDate->format('d/m/Y').' already exists.');
+                        // error_log('Transaction with date '.$transaction->transactionDate->format('d/m/Y').' already exists.');
                     }
                 }
 

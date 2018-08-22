@@ -51,7 +51,7 @@ class SantanderTransactionsListTemplate extends BaseModel {
         ],
         [
             'title' => 'Importe',
-            'name' => 'import',
+            'name' => 'value',
         ],
         [
             'title' => 'Saldo',
@@ -63,9 +63,29 @@ class SantanderTransactionsListTemplate extends BaseModel {
         return (float) str_replace(',','.',str_replace('.','',$value));
     }
 
+    private static function getAccountFromSpreadsheet($spreadsheet) {
+        $found = SpreadsheetHelper::searchFirstInCells('Número de Cuenta:', $spreadsheet);
+
+        if (is_null($found)) {
+            return null;
+        }
+
+        $worksheet = $found['worksheet'];
+        $headerCell = $found['cell'];
+        $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
+        $colIndex = $headerColIndex + 2;
+
+        $account = $worksheet->getCellByColumnAndRow($colIndex, $headerCell->getRow())->getValue();
+        $account = str_replace(" ", "", $account);
+        $account = trim($account);
+
+        return $account;
+    }
+
     public static function getTransactionsListFromFile($fd) {
 
         $spreadsheet = SpreadsheetHelper::openFile($fd);
+        $account = self::getAccountFromSpreadsheet($spreadsheet);
 
         $data = [];
         foreach (self::FIELD_NAMES as $field) {
@@ -105,6 +125,7 @@ class SantanderTransactionsListTemplate extends BaseModel {
             foreach (self::FIELD_NAMES as $field) {
                 $rowData[$field['name']] = $data[$field['name']][$rowIndex];
             }
+            $rowData['account'] = $account;
 
             // parse strings
             $rowData['concept'] = trim($rowData['concept']);
@@ -114,7 +135,7 @@ class SantanderTransactionsListTemplate extends BaseModel {
             $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
 
             // parse numbers
-            $rowData['import'] = self::string2floatSpanish($rowData['import']);
+            $rowData['value'] = self::string2floatSpanish($rowData['value']);
             $rowData['balance'] = self::string2floatSpanish($rowData['balance']);
 
 
