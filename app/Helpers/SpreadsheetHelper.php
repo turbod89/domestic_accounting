@@ -7,7 +7,9 @@
 
 namespace App\Helpers;
 
+use Illuminate\Http\File;
 use PhpOffice\PhpSpreadsheet\Reader;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class SpreadsheetHelper extends BaseHelper {
 
@@ -22,7 +24,18 @@ class SpreadsheetHelper extends BaseHelper {
     }
 
     public static function openFile($fd) {
-        $reader = new Reader\Xlsx();
+
+        $file = new File($fd);
+
+        $reader = null;
+        if ($file->getExtension() === 'xlsx') {
+            $reader = new Reader\Xlsx();
+        } else if ($file->getExtension() === 'xls') {
+            $reader = new Reader\Xls();
+        } else {
+            return null;
+        }
+
         $reader->setReadDataOnly(true);
         return $reader->load($fd);
     }
@@ -57,8 +70,8 @@ class SpreadsheetHelper extends BaseHelper {
     /**
      * Search a value once in document cell's
      *
-     * @param $searchValue
-     * @param $spreadsheet
+     * @param $searchValue string
+     * @param $spreadsheet Spreadsheet
      * @return array of ['worksheet' => worksheet, 'cell' => cell]
      */
     public static function searchFirstInCells($searchValue, $spreadsheet) {

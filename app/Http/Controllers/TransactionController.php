@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\SpreadsheetHelper;
+use App\IngTransactionsListTemplate;
 use App\SantanderTransactionsListTemplate;
 use App\Transaction;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ class TransactionController extends BaseController
                     $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd);
                 } else if (preg_match('/ing.?.?direct/i',$file->getClientOriginalName())) {
                     error_log('ing direct');
+                    $data = IngTransactionsListTemplate::getTransactionsListFromFile($dstFd);
                 } else {
                     error_log('Not known entity');
                 }

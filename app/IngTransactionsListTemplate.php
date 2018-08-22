@@ -4,49 +4,41 @@ namespace App;
 use App\Helpers\SpreadsheetHelper;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-class SantanderTransactionsListTemplate extends TransactionsListTemplate {
+class IngTransactionsListTemplate extends TransactionsListTemplate {
 
     const FIELD_NAMES=[
         [
-            'title' => 'Fecha Operación',
+            'title' => 'FECHA VALOR',
             'name' => 'transactionDate',
+            'coordinate' => 'A6',
         ],
         [
-            'title' => 'Fecha Valor',
+            'title' => 'FECHA VALOR',
             'name' => 'valueDate',
+            'coordinate' => 'A6',
         ],
         [
-            'title' => 'Concepto',
+            'title' => 'DESCRIPCIÓN',
             'name' => 'concept',
+            'coordinate' => 'C6',
         ],
         [
-            'title' => 'Importe',
+            'title' => 'IMPORTE (€)',
             'name' => 'value',
+            'coordinate' => 'F6',
         ],
         [
-            'title' => 'Saldo',
+            'title' => 'SALDO (€)',
             'name' => 'balance',
+            'coordinate' => 'G6',
         ],
     ];
 
-    private static function string2floatSpanish($value) {
-        return (float) str_replace(',','.',str_replace('.','',$value));
-    }
-
-    private static function getAccountFromSpreadsheet($spreadsheet) {
-        $found = SpreadsheetHelper::searchFirstInCells('Número de Cuenta:', $spreadsheet);
-
-        if (is_null($found)) {
-            return null;
-        }
-
-        $worksheet = $found['worksheet'];
-        $headerCell = $found['cell'];
-        $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
-        $colIndex = $headerColIndex + 2;
-
-        $account = $worksheet->getCellByColumnAndRow($colIndex, $headerCell->getRow())->getValue();
+    private static function getAccountFromSpreadsheet(Spreadsheet $spreadsheet) {
+        $worksheet = $spreadsheet->getActiveSheet();
+        $account = $worksheet->getCellByColumnAndRow(4, 2)->getValue();
         $account = str_replace(" ", "", $account);
         $account = trim($account);
 
@@ -59,24 +51,21 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
         $account = self::getAccountFromSpreadsheet($spreadsheet);
 
         $data = [];
+        $worksheet = $spreadsheet->getActiveSheet();
+
         foreach (self::FIELD_NAMES as $field) {
 
-            $found = SpreadsheetHelper::searchFirstInCells($field['title'], $spreadsheet);
+            $headerCell = $worksheet->getCell($field['coordinate']);
+            $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
 
-            if (!is_null($found)) {
-                $worksheet = $found['worksheet'];
-                $headerCell = $found['cell'];
-                $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
+            $highestRow = $worksheet->getHighestRow();
 
-                $highestRow = $worksheet->getHighestRow();
-
-                $colIndex = $headerColIndex;
-                for ($rowIndex = $headerCell->getRow() + 1; $rowIndex <= $highestRow ; $rowIndex++) {
-                    $value = $worksheet->getCellByColumnAndRow($colIndex, $rowIndex)->getValue();
-                    $data[$field['name']][] = $value;
-                }
-
+            $colIndex = $headerColIndex;
+            for ($rowIndex = $headerCell->getRow() + 1; $rowIndex <= $highestRow ; $rowIndex++) {
+                $value = $worksheet->getCellByColumnAndRow($colIndex, $rowIndex)->getValue();
+                $data[$field['name']][] = $value;
             }
+
         }
 
         // check consistency
@@ -106,8 +95,8 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
             $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
 
             // parse numbers
-            $rowData['value'] = self::string2floatSpanish($rowData['value']);
-            $rowData['balance'] = self::string2floatSpanish($rowData['balance']);
+            $rowData['value'] = self::string2floatEnglish($rowData['value']);
+            $rowData['balance'] = self::string2floatEnglish($rowData['balance']);
 
 
             $transaction = new Transaction();
