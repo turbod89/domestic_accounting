@@ -108,8 +108,8 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
             $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
 
             // parse numbers
-            $rowData['value'] = self::string2floatSpanish($rowData['value']);
-            $rowData['balance'] = self::string2floatSpanish($rowData['balance']);
+            $rowData['value'] = self::string2floatEnglish($rowData['value']);
+            $rowData['balance'] = self::string2floatEnglish($rowData['balance']);
 
 
             $transaction = new Transaction();
