@@ -27,6 +27,8 @@ class TransactionController extends BaseController
      * @return view
      */
     public function import(Request $request) {
+        $user = $request->user();
+
         $files = $request->allFiles();
         foreach ($files as $file) {
 
@@ -46,10 +48,10 @@ class TransactionController extends BaseController
                 $data = [];
                 if (preg_match('/santander/i',$file->getClientOriginalName())) {
                     error_log('Santander');
-                    $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd);
+                    $data = SantanderTransactionsListTemplate::getTransactionsListFromFile($dstFd,$user);
                 } else if (preg_match('/ing.?.?direct/i',$file->getClientOriginalName())) {
                     error_log('ing direct');
-                    $data = IngTransactionsListTemplate::getTransactionsListFromFile($dstFd);
+                    $data = IngTransactionsListTemplate::getTransactionsListFromFile($dstFd,$user);
                 } else {
                     error_log('Not known entity');
                 }
@@ -60,7 +62,7 @@ class TransactionController extends BaseController
                         ['transaction_date',$transaction->transactionDate],
                         ['value_date',$transaction->valueDate],
                         ['concept',$transaction->concept],
-                        ['account',$transaction->account],
+                        ['id_account',$transaction->idAccount],
                         ['value',$transaction->value],
                         ['balance',$transaction->balance],
                     ])->first();
@@ -76,10 +78,23 @@ class TransactionController extends BaseController
             }
 
         }
+
+        return $this->getAll($request);
     }
 
     public function getAll(Request $request) {
-        $transactions = Transaction::get();
-        return response()->json($transactions);
+
+        $user = $request->user();
+        $accounts = $user->accounts;
+
+        $accountsArray = [];
+        foreach($accounts as $account ) {
+            $accountArray = $account->toArray();
+            $transactionsArray = $account->transactions->toArray();
+            $accountArray['transactions'] = $transactionsArray;
+            $accountsArray[] = $accountArray;
+        }
+
+        return response()->json($accountsArray);
     }
 }

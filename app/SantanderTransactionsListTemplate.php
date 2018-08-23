@@ -30,7 +30,7 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
         ],
     ];
 
-    private static function getAccountFromSpreadsheet($spreadsheet) {
+    private static function getAccountFromSpreadsheet($spreadsheet,$owner) {
         $found = SpreadsheetHelper::searchFirstInCells('Número de Cuenta:', $spreadsheet);
 
         if (is_null($found)) {
@@ -42,17 +42,23 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
         $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
         $colIndex = $headerColIndex + 2;
 
-        $account = $worksheet->getCellByColumnAndRow($colIndex, $headerCell->getRow())->getValue();
-        $account = str_replace(" ", "", $account);
-        $account = trim($account);
+        $accountName = $worksheet->getCellByColumnAndRow($colIndex, $headerCell->getRow())->getValue();
+        $accountName = str_replace(" ", "", $accountName);
+        $accountName = trim($accountName);
+
+        $account = Account::firstOrCreate([
+            'name' => $accountName,
+        ],[
+            'owner' => $owner,
+        ]);
 
         return $account;
     }
 
-    public static function getTransactionsListFromFile($fd) {
+    public static function getTransactionsListFromFile($fd,$user) {
 
         $spreadsheet = SpreadsheetHelper::openFile($fd);
-        $account = self::getAccountFromSpreadsheet($spreadsheet);
+        $account = self::getAccountFromSpreadsheet($spreadsheet,$user);
 
         $data = [];
         foreach (self::FIELD_NAMES as $field) {

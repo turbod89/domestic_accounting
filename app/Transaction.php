@@ -56,6 +56,13 @@ class Transaction extends BaseModel {
         $this->attributes['value_date'] = new Carbon($value);
     }
 
+    public function setAccountAttribute(Account $account) {
+        $this->attributes['id_account'] = $account->id;
+    }
+
+    public function account() {
+        return $this->hasOne('App\Account','id','id_account');
+    }
 
 
     protected $connection = 'local';

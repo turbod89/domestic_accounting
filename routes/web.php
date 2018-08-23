@@ -12,6 +12,7 @@
 */
 
 $router->get('/', [
+    'middleware' => 'auth',
     'as' => 'getAll',
     'uses' => 'TransactionController@getAll'
 ]);

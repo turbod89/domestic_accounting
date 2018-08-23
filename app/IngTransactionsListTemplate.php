@@ -36,19 +36,25 @@ class IngTransactionsListTemplate extends TransactionsListTemplate {
         ],
     ];
 
-    private static function getAccountFromSpreadsheet(Spreadsheet $spreadsheet) {
+    private static function getAccountFromSpreadsheet(Spreadsheet $spreadsheet,User $owner) {
         $worksheet = $spreadsheet->getActiveSheet();
-        $account = $worksheet->getCellByColumnAndRow(4, 2)->getValue();
-        $account = str_replace(" ", "", $account);
-        $account = trim($account);
+        $accountName = $worksheet->getCellByColumnAndRow(4, 2)->getValue();
+        $accountName = str_replace(" ", "", $accountName);
+        $accountName = trim($accountName);
+
+        $account = Account::firstOrCreate([
+            'name' => $accountName,
+        ],[
+            'owner' => $owner,
+        ]);
 
         return $account;
     }
 
-    public static function getTransactionsListFromFile($fd) {
+    public static function getTransactionsListFromFile($fd, User $user) {
 
         $spreadsheet = SpreadsheetHelper::openFile($fd);
-        $account = self::getAccountFromSpreadsheet($spreadsheet);
+        $account = self::getAccountFromSpreadsheet($spreadsheet, $user);
 
         $data = [];
         $worksheet = $spreadsheet->getActiveSheet();
