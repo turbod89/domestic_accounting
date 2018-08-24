@@ -21,3 +21,8 @@ $router->post('/', [
     'as' => 'import',
     'uses' => 'TransactionController@import'
 ]);
+
+$router->get('/token',[
+    'as' => 'getToken',
+    'uses' => 'TokenController@getToken',
+]);

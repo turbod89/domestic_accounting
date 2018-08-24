@@ -21,9 +21,9 @@ class CreateUsersTable extends Migration
 
             $table->increments('id');
 
-            $table->string('api_token',256)->nullable(false);
             $table->string('username',32)->nullable(false);
             $table->string('email',128)->nullable(false);
+            $table->string('hashed_password',128)->nullable(false);
 
             $table->string('first_name',32)->nullable(true);
             $table->string('last_name',32)->nullable(true);
@@ -31,7 +31,6 @@ class CreateUsersTable extends Migration
             $table->dateTime('create_at')->default(DB::raw('NOW()'));
             $table->dateTime('update_at')->default(DB::raw('NOW()'));
 
-            $table->unique('api_token', 'api_token');
             $table->unique('email', 'email');
             $table->unique('username', 'username');
         });
