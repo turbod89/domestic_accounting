@@ -40,8 +40,8 @@ class Authenticate
                 ->json([
                     'error' => [
                         'code' => 1,
-                        'message' => 'Unauthorized user token.'
-                    ]
+                        'message' => 'Unauthorized user token.',
+                    ],
                 ],401);
         }
 

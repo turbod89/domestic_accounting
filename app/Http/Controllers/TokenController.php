@@ -35,10 +35,14 @@ class TokenController extends BaseController
         ])->first();
 
         if (is_null($token)) {
-            return response()->json(['error' => [
-                'code' => 1,
-                'message' => 'Unathorited API token.'
-            ]],401);
+            return response()->json([
+                'errors' => [
+                    [
+                        'code' => 1,
+                        'message' => 'Unathorited API token.'
+                    ],
+                ]
+            ],401);
         }
 
         $userToken = new Token([
