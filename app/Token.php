@@ -3,6 +3,7 @@
 namespace App;
 use App\Helpers;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Token extends BaseModel {
 
@@ -68,6 +69,10 @@ class Token extends BaseModel {
         }
 
         return is_null(self::$session) ? new Token() : self::$session;
+    }
+
+    public static function clean() {
+        self::where(DB::raw('expire_at < NOW()'))->delete();
     }
 
     protected $connection = 'local';

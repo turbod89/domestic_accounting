@@ -18,13 +18,23 @@ $router->get('/', [
 ]);
 
 $router->post('/', [
+    'middleware' => 'auth',
     'as' => 'import',
     'uses' => 'TransactionController@import'
 ]);
 
+/*
+ |------------------------------------------------
+ | Tokens
+ |------------------------------------------------
+ |
+ |
+ |
+ */
+
 $router->get('/token',[
     'as' => 'getToken',
-    'uses' => 'TokenController@getToken',
+    'uses' => 'TokenController@getSessionToken',
 ]);
 
 /*

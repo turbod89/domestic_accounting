@@ -18,7 +18,7 @@ class TokenController extends BaseController
         parent::__construct();
     }
 
-    public function getToken(Request  $request) {
+    public function getSessionToken(Request  $request) {
 
         $tokenValue = null;
 
@@ -54,6 +54,8 @@ class TokenController extends BaseController
         $sessionToken->api = $token->api;
         $sessionToken->save();
 
-        return response()->json(['session_token' => $sessionToken->value]);
+        return response()->json([
+                'session_token' => $sessionToken->only(['value','expire_at']),
+            ]);
     }
 }
