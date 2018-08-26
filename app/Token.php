@@ -6,6 +6,8 @@ use Carbon\Carbon;
 
 class Token extends BaseModel {
 
+    private static $session = null;
+
     protected $table = 'tokens';
     protected $primaryKey = 'id';
 
@@ -57,6 +59,15 @@ class Token extends BaseModel {
 
     public function user() {
         return $this->hasOne('App\User','id','id_user');
+    }
+
+    public static function session($session = null) {
+
+        if (!is_null($session)) {
+            self::$session = $session;
+        }
+
+        return is_null(self::$session) ? new Token() : self::$session;
     }
 
     protected $connection = 'local';

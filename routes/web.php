@@ -26,3 +26,37 @@ $router->get('/token',[
     'as' => 'getToken',
     'uses' => 'TokenController@getToken',
 ]);
+
+/*
+ |------------------------------------------------
+ | Auth
+ |------------------------------------------------
+ |
+ |
+ |
+ */
+
+$router->post('/auth',[
+    'as' => 'login',
+    'uses' => 'AuthController@login',
+]);
+
+$router->post('/auth/login',[
+    'as' => 'login',
+    'uses' => 'AuthController@login',
+]);
+
+$router->delete('/auth',[
+    'as' => 'logout',
+    'uses' => 'AuthController@logout',
+]);
+
+$router->get('/auth/logout',[
+    'as' => 'logout',
+    'uses' => 'AuthController@logout',
+]);
+
+$router->post('/auth/signup',[
+    'as' => 'login',
+    'uses' => 'AuthController@signup',
+]);

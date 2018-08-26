@@ -2,9 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Token;
 use Illuminate\Http\Request;
 
-class AuthController extends BaseController
+/*
+|--------------------------------------------------------------------------
+| Auth Controller
+|--------------------------------------------------------------------------
+|
+| This class is an extension of AuthBaseController.
+| All logic should be in the parent class AuthBaseController. When create a
+| new function on parent class, then just overload it here as login or
+| sign up examples.
+|
+|
+*/
+
+class AuthController extends AuthBaseController
 {
     /**
      * Create a new controller instance.
@@ -16,30 +30,71 @@ class AuthController extends BaseController
         parent::__construct();
     }
 
-    public function login(Request $request) {
-        $username = $request->input('username');
-        $password = $request->input('password');
 
-        $user = User::where([
-            ['username', $username],
-            ['hashed_password', md5($password)],
-        ])->first();
+    public static function getSessionToken(Request $request,callable $onSuccess,callable $onError) {
+        $tokenValue = null;
 
-        if (is_null($user)) {
-            return response()->json([
-                'errors' => [
-                    [
-                        'code' => 1,
-                        'message' => 'Wrong username or password',
-                    ],
-                ],
-            ],401);
+        if ($request->has('session_token') ) {
+            $tokenValue = $request->input('session_token');
+        } else if ( $request->headers->has('session-token') ) {
+            $tokenValue = $request->header('session-token');
         }
 
-        // $token
+        $sessionToken = Token::where([
+            ['type', 'session token'],
+            ['value' , $tokenValue],
+        ])->first();
 
-        return response()
-            ->json(['errors' => []]);
+        Token::session($sessionToken);
+
+        if (is_null($sessionToken)) {
+            return $onError($request);
+        }
+
+        return $onSuccess($request);
     }
+
+    public static function unauthorizedSessionToken() {
+        return response()
+            ->json([
+                'error' => [
+                    'code' => 1,
+                    'message' => 'Unauthorized session token.',
+                ],
+            ],401);
+    }
+
+
+    public function login(Request $request) {
+        return self::getSessionToken(
+            $request,
+            function (Request $request) {
+                return parent::login($request);
+            },
+            [self::class,'unauthorizedSessionToken']
+        );
+    }
+
+    public function logout(Request $request) {
+        return self::getSessionToken(
+            $request,
+            function (Request $request) {
+                return parent::logout($request);
+            },
+            [self::class,'unauthorizedSessionToken']
+        );
+    }
+
+    public function signup(Request $request) {
+        return self::getSessionToken(
+            $request,
+            function (Request $request) {
+                return parent::signup($request);
+            },
+            [self::class,'unauthorizedSessionToken']
+        );
+    }
+
+
 }
 

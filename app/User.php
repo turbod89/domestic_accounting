@@ -4,7 +4,6 @@ namespace App;
 
 use Illuminate\Auth\Authenticatable;
 use Laravel\Lumen\Auth\Authorizable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
@@ -20,7 +19,7 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
      * @var array
      */
     protected $fillable = [
-        'name', 'email',
+        'username', 'email', 'password'
     ];
 
     /**
@@ -30,7 +29,12 @@ class User extends BaseModel implements AuthenticatableContract, AuthorizableCon
      */
     protected $hidden = [
         'password',
+        'hashed_password',
     ];
+
+    public function setPasswordAttribute($password) {
+        $this->attributes['hashed_password'] = md5($password);
+    }
 
     public function accounts() {
         return $this->hasMany('App\Account','id_user_owner','id');

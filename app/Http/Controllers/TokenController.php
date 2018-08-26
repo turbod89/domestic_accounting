@@ -45,15 +45,15 @@ class TokenController extends BaseController
             ],401);
         }
 
-        $userToken = new Token([
-            'type' => 'user token',
+        $sessionToken = new Token([
+            'type' => 'session token',
             'value' => md5(''.(1000*microtime(true))),
             'expire_at' => Carbon::now()->addDays(7),
         ]);
 
-        $userToken->api = $token->api;
-        $userToken->save();
+        $sessionToken->api = $token->api;
+        $sessionToken->save();
 
-        return response()->json(['user_token' => $userToken->value]);
+        return response()->json(['session_token' => $sessionToken->value]);
     }
 }
