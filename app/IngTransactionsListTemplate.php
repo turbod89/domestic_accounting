@@ -77,7 +77,7 @@ class IngTransactionsListTemplate extends TransactionsListTemplate {
         // check consistency
         $consistent = true;
         for ($i = 1; $i < count(self::FIELD_NAMES) && $consistent; $i++) {
-            $consistent = $consistent && count(self::FIELD_NAMES[$i-1]) === count(self::FIELD_NAMES[$i]);
+            $consistent = $consistent && count($data[self::FIELD_NAMES[$i-1]['name']]) === count($data[self::FIELD_NAMES[$i]['name']]);
         }
 
         if (!$consistent) {
