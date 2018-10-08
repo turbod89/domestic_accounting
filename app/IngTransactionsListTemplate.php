@@ -22,17 +22,17 @@ class IngTransactionsListTemplate extends TransactionsListTemplate {
         [
             'title' => 'DESCRIPCIÓN',
             'name' => 'concept',
-            'coordinate' => 'C6',
+            'coordinate' => 'D6',
         ],
         [
             'title' => 'IMPORTE (€)',
             'name' => 'value',
-            'coordinate' => 'F6',
+            'coordinate' => 'G6',
         ],
         [
             'title' => 'SALDO (€)',
             'name' => 'balance',
-            'coordinate' => 'G6',
+            'coordinate' => 'H6',
         ],
     ];
 
