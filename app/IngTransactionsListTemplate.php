@@ -92,18 +92,17 @@ class IngTransactionsListTemplate extends TransactionsListTemplate {
                 $rowData[$field['name']] = $data[$field['name']][$rowIndex];
             }
             $rowData['account'] = $account;
-
             // parse strings
             $rowData['concept'] = trim($rowData['concept']);
-
             // parse dates
-            $rowData['transactionDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['transactionDate'].' 00');
-            $rowData['valueDate'] = Carbon::createFromFormat('d/m/Y H', $rowData['valueDate'].' 00');
+            $rowData['transactionDate'] = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData['transactionDate']);
+            $rowData['transactionDate'] = Carbon::instance($rowData['transactionDate']);
+            $rowData['valueDate'] = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($rowData['valueDate']);
+            $rowData['valueDate'] = Carbon::instance($rowData['valueDate']);
 
             // parse numbers
             $rowData['value'] = self::string2floatEnglish($rowData['value']);
             $rowData['balance'] = self::string2floatEnglish($rowData['balance']);
-
 
             $transaction = new Transaction();
             $transaction->fill($rowData);
