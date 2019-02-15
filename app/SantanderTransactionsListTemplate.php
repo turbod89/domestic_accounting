@@ -9,7 +9,7 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
 
     const FIELD_NAMES=[
         [
-            'title' => 'Fecha Operación',
+            'title' => 'FECHA OPERACIÓN', // NOTE: Stressed vowels as "Ó" do not pass to lower with strtolower
             'name' => 'transactionDate',
         ],
         [
@@ -21,7 +21,7 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
             'name' => 'concept',
         ],
         [
-            'title' => 'Importe',
+            'title' => 'Importe Eur',
             'name' => 'value',
         ],
         [
@@ -31,7 +31,8 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
     ];
 
     private static function getAccountFromSpreadsheet($spreadsheet,$owner) {
-        $found = SpreadsheetHelper::searchFirstInCells('Número de Cuenta:', $spreadsheet);
+
+        $found = SpreadsheetHelper::searchFirstInCells('Cuenta', $spreadsheet);
 
         if (is_null($found)) {
             return null;
@@ -39,10 +40,12 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
 
         $worksheet = $found['worksheet'];
         $headerCell = $found['cell'];
+        $headerRowIndex = $headerCell->getRow();
         $headerColIndex = Coordinate::columnIndexFromString($headerCell->getColumn());
-        $colIndex = $headerColIndex + 2;
+        $colIndex = $headerColIndex + 0;
+        $rowIndex = $headerRowIndex + 4;
 
-        $accountName = $worksheet->getCellByColumnAndRow($colIndex, $headerCell->getRow())->getValue();
+        $accountName = $worksheet->getCellByColumnAndRow($colIndex, $rowIndex)->getValue();
         $accountName = str_replace(" ", "", $accountName);
         $accountName = trim($accountName);
 
@@ -73,7 +76,7 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
                 $highestRow = $worksheet->getHighestRow();
 
                 $colIndex = $headerColIndex;
-                for ($rowIndex = $headerCell->getRow() + 1; $rowIndex <= $highestRow ; $rowIndex++) {
+                for ($rowIndex = $headerCell->getRow() + 2; $rowIndex <= $highestRow ; $rowIndex++) {
                     $value = $worksheet->getCellByColumnAndRow($colIndex, $rowIndex)->getValue();
                     $data[$field['name']][] = $value;
                 }
@@ -84,13 +87,14 @@ class SantanderTransactionsListTemplate extends TransactionsListTemplate {
         // check consistency
         $consistent = true;
         for ($i = 1; $i < count(self::FIELD_NAMES) && $consistent; $i++) {
-            $consistent = $consistent && count($data[self::FIELD_NAMES[$i-1]['name']]) === count($data[self::FIELD_NAMES[$i]['name']]);
+            $consistent = $consistent && (count($data[self::FIELD_NAMES[$i-1]['name']]) === count($data[self::FIELD_NAMES[$i]['name']]));
         }
 
         if (!$consistent) {
             error_log('Inconsistency in data');
             return null;
         }
+
 
         $parsedData = [];
         foreach ($data[self::FIELD_NAMES[0]['name']] as $rowIndex => $value) {

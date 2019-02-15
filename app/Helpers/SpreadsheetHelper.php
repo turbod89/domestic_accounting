@@ -52,9 +52,9 @@ class SpreadsheetHelper extends BaseHelper {
         foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
             foreach ($worksheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(true);
+                // $cellIterator->setIterateOnlyExistingCells(true);
                 foreach ($cellIterator as $cell) {
-                    if ($cell->getValue() == $searchValue) {
+                    if (strtolower($cell->getValue()) == strtolower($searchValue)) {
                         $foundInCells[] = [
                             'worksheet' => $worksheet,
                             'cell' => $cell,
@@ -78,9 +78,9 @@ class SpreadsheetHelper extends BaseHelper {
         foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
             foreach ($worksheet->getRowIterator() as $row) {
                 $cellIterator = $row->getCellIterator();
-                $cellIterator->setIterateOnlyExistingCells(true);
+                //$cellIterator->setIterateOnlyExistingCells(true);
                 foreach ($cellIterator as $cell) {
-                    if ($cell->getValue() == $searchValue) {
+                    if (strtolower($cell->getValue()) == strtolower($searchValue)) {
                         return [
                             'worksheet' => $worksheet,
                             'cell' => $cell,
