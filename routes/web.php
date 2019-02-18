@@ -23,6 +23,12 @@ $router->post('/', [
     'uses' => 'TransactionController@import'
 ]);
 
+$router->get('/accounts/{id_account}/report', [
+    'middleware' => 'auth',
+    'as' => 'getReport',
+    'uses' => 'AccountController@getReport'
+]);
+
 /*
  |------------------------------------------------
  | Tokens
