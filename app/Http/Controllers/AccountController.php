@@ -61,6 +61,8 @@ class AccountController extends BaseController
                         $cell->setValue('Date');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 0)->setAutoSize(true);
+
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $year = $transaction->year;
@@ -86,6 +88,7 @@ class AccountController extends BaseController
                         $cell->setValue('In');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 2)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $cell = $worksheet->getCellByColumnAndRow($colIndex + 2, $rowIndex + 1 + $i);
@@ -102,6 +105,7 @@ class AccountController extends BaseController
                         $cell->setValue('Out');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 3)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $cell = $worksheet->getCellByColumnAndRow($colIndex + 3, $rowIndex + 1 + $i);
@@ -118,6 +122,7 @@ class AccountController extends BaseController
                         $cell->setValue('Number Transactions');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 5)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $cell = $worksheet->getCellByColumnAndRow($colIndex + 5, $rowIndex + 1 + $i);
@@ -133,6 +138,7 @@ class AccountController extends BaseController
                         $cell->setValue('Value');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 6)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $cell = $worksheet->getCellByColumnAndRow($colIndex + 6, $rowIndex + 1 + $i);
@@ -148,6 +154,7 @@ class AccountController extends BaseController
                         $cell->setValue('Balance');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 7)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         $cell = $worksheet->getCellByColumnAndRow($colIndex + 7, $rowIndex + 1 + $i);
@@ -164,6 +171,7 @@ class AccountController extends BaseController
                         $cell->setValue('Adjust');
                         $cell->getStyle()->getFont()->setBold(true);
                         $cell->setDataType(DataType::TYPE_STRING);
+                        $worksheet->getColumnDimensionByColumn($colIndex + 8)->setAutoSize(true);
                     },
                     "setBody" => function (Worksheet $worksheet, $transaction, $i, $report) use ($colIndex, $rowIndex) {
                         if ($i <= 0) {
@@ -181,18 +189,18 @@ class AccountController extends BaseController
                 ],
             ];
 
-            // headers
-            foreach ($fields as $j => $field) {
-                $field['setHeader']($worksheet,$report);
-            }
-            $worksheet->setAutoFilterByColumnAndRow(2,2,10,2);
-
             // body
             foreach ($report as $i => $transaction) {
                 foreach ($fields as $j => $field) {
                     $field['setBody']($worksheet,$transaction,$i,$report);
                 }
             }
+
+            // headers
+            foreach ($fields as $j => $field) {
+                $field['setHeader']($worksheet,$report);
+            }
+            $worksheet->setAutoFilterByColumnAndRow(2,2,10,2);
 
 
         } else {
@@ -211,8 +219,6 @@ class AccountController extends BaseController
                     $report = $account->getReport($detail);
                     if ($output === 'excel') {
                         $spreadsheet = new Spreadsheet();
-                        $worksheet = $spreadsheet->getActiveSheet();
-                        self::reportToExcel($worksheet, $report);
                         $spreadsheet->getProperties()
                             ->setCreator("Raccoon Domestic Accounting")
                             ->setLastModifiedBy("Raccoon Domestic Accounting")
@@ -224,6 +230,9 @@ class AccountController extends BaseController
                             ->setKeywords("office 2007 openxml php")
                             //->setCategory("")
                         ;
+                        $worksheet = $spreadsheet->getActiveSheet();
+                        $worksheet->setTitle("Account {$account->id}");
+                        self::reportToExcel($worksheet, $report);
                         $filename = "report_{$account->name}_$detail.xlsx";
                         $path = "../storage/app/$filename";
                         $writer = new Xlsx($spreadsheet);
