@@ -69,9 +69,9 @@ class Account extends BaseModel {
             from
                 (
                     select
-                        @annual*year(t.value_date) as y,
-                        @monthly*month(t.value_date) as m,
-                        @daily*day(t.value_date) as d,
+                        @annual*year(t.transaction_date) as y,
+                        @monthly*month(t.transaction_date) as m,
+                        @daily*day(t.transaction_date) as d,
                         sum(t.value) as value,
                         sum(if(t.value > 0, t.value, 0)) as value_in,
                         sum(if(t.value < 0, t.value, 0)) as value_out,
@@ -81,9 +81,9 @@ class Account extends BaseModel {
                     inner join raccoon.users u on u.id = a.id_user_owner
                     where a.id = @id_account
                     group by
-                        @annual*year(t.value_date)
-                        , @monthly*month(t.value_date)
-                        , @daily*day(t.value_date)
+                        @annual*year(t.transaction_date)
+                        , @monthly*month(t.transaction_date)
+                        , @daily*day(t.transaction_date)
                 ) as t
             left join
                 (
@@ -95,21 +95,21 @@ class Account extends BaseModel {
                     from (
                         select
                             max(t.id) as id,
-                            @annual*year(t.value_date) y,
-                            @monthly*month(t.value_date) m,
-                            @daily*day(t.value_date) d
+                            @annual*year(t.transaction_date) y,
+                            @monthly*month(t.transaction_date) m,
+                            @daily*day(t.transaction_date) d
                         from raccoon.transactions t
                         where t.id_account = @id_account
                         group by
-                            @annual*year(t.value_date)
-                            , @monthly*month(t.value_date)
-                            , @daily*day(t.value_date)
+                            @annual*year(t.transaction_date)
+                            , @monthly*month(t.transaction_date)
+                            , @daily*day(t.transaction_date)
                     ) ids
                     inner join raccoon.transactions t on t.id = ids.id
                 ) as b on b.d = t.d and b.m = t.m and b.y = t.y
             
             order by
-                1 @year_orderBy @month_orderBy @day_orderBy";
+                1 asc @year_orderBy @month_orderBy @day_orderBy";
 
         $query = $queryTemplate;
 
@@ -120,9 +120,9 @@ class Account extends BaseModel {
             $query = str_replace("@month_select","t.m as `month`,",$query);
             $query = str_replace("@year_select","t.y as `year`,",$query);
 
-            $query = str_replace("@day_orderBy",", `day` desc",$query);
-            $query = str_replace("@month_orderBy",", `month` desc",$query);
-            $query = str_replace("@year_orderBy",", `year` desc",$query);
+            $query = str_replace("@day_orderBy",", `day` asc",$query);
+            $query = str_replace("@month_orderBy",", `month` asc",$query);
+            $query = str_replace("@year_orderBy",", `year` asc",$query);
 
             $query = str_replace("@daily","1",$query);
             $query = str_replace("@monthly","1",$query);
@@ -133,8 +133,8 @@ class Account extends BaseModel {
             $query = str_replace("@year_select","t.y as `year`,",$query);
 
             $query = str_replace("@day_orderBy","",$query);
-            $query = str_replace("@month_orderBy",", `month` desc",$query);
-            $query = str_replace("@year_orderBy",", `year` desc",$query);
+            $query = str_replace("@month_orderBy",", `month` asc",$query);
+            $query = str_replace("@year_orderBy",", `year` asc",$query);
 
             $query = str_replace("@daily","0",$query);
             $query = str_replace("@monthly","1",$query);
@@ -147,7 +147,7 @@ class Account extends BaseModel {
 
             $query = str_replace("@day_orderBy", "", $query);
             $query = str_replace("@month_orderBy", "", $query);
-            $query = str_replace("@year_orderBy", ", `year` desc", $query);
+            $query = str_replace("@year_orderBy", ", `year` asc", $query);
 
             $query = str_replace("@daily", "0", $query);
             $query = str_replace("@monthly", "0", $query);
