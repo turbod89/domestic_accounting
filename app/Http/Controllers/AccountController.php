@@ -46,9 +46,7 @@ class AccountController extends BaseController
         return $func($request, $account);
     }
 
-    public static function reportToExcel($report) {
-        $spreadsheet = new Spreadsheet();
-        $worksheet = $spreadsheet->getActiveSheet();
+    public static function reportToExcel(Worksheet $worksheet,$report) {
 
         if (isset($report[0])) {
 
@@ -201,7 +199,7 @@ class AccountController extends BaseController
 
         }
 
-        return $spreadsheet;
+        return $worksheet;
     }
 
     public function getReport(Request $request, $idAccount) {
@@ -212,7 +210,9 @@ class AccountController extends BaseController
 
                     $report = $account->getReport($detail);
                     if ($output === 'excel') {
-                        $spreadsheet = self::reportToExcel($report);
+                        $spreadsheet = new Spreadsheet();
+                        $worksheet = $spreadsheet->getActiveSheet();
+                        self::reportToExcel($worksheet, $report);
                         $spreadsheet->getProperties()
                             ->setCreator("Raccoon Domestic Accounting")
                             ->setLastModifiedBy("Raccoon Domestic Accounting")
@@ -224,7 +224,8 @@ class AccountController extends BaseController
                             ->setKeywords("office 2007 openxml php")
                             //->setCategory("")
                         ;
-                        $path = "report_{$account->name}_$detail.xlsx";
+                        $filename = "report_{$account->name}_$detail.xlsx";
+                        $path = "../storage/app/$filename";
                         $writer = new Xlsx($spreadsheet);
                         $writer->save($path);
                         return response()->download($path);
